@@ -23,7 +23,10 @@ let rowTemplate = `
             <label class="form-check-label"><input class="form-check-input" type="checkbox" role="switch"></label>
         </div>
     </td>
-    <td class="cat-feeder-scoops"> <input type="number" name="scoop"></td>
+    <td class="cat-feeder-scoops"> 
+<!--         <input type="number" name="scoop"> -->
+        <select name="scoop"></select>
+    </td>
     <td class="cat-feeder-save"> <button class="btn btn-primary">Save</td>
 </tr>
 `
@@ -70,21 +73,24 @@ function buildRow(feederConfig){
     row.find(".cat-feeder-enable2 input").prop("checked", whichEnabled[1])
 
     // how many scoops
-    row.find(".cat-feeder-scoops input").val(Number(feederConfig.scoop))
+    for (let i = 0; i <= 10; i++){
+        row.find(".cat-feeder-scoops select").append($('<option></option>').val(i).html(i))
+    }
+    row.find(".cat-feeder-scoops select").val(Number(feederConfig.scoop))
 
     // validation stuff
-    row.find("input").on("change", () => {
+    row.find("input,select").on("change", () => {
         // change the color of the save button when a change of any sort is detected
         row.find(".cat-feeder-save button").removeClass("btn-primary").addClass("btn-danger")
     })
 
-    row.find(".cat-feeder-save button").click((e) => {
+    row.find(".cat-feeder-save button").on("click", () => {
         let enabled = Boolean(row.find(".cat-feeder-enabled input").prop("checked"))
         let slot = feederConfig.slot
         let feeder1Enabled = Boolean(row.find(".cat-feeder-enable1 input").prop("checked"))
         let feeder2Enabled = Boolean(row.find(".cat-feeder-enable2 input").prop("checked"))
         let feeder = String(reverseDetermineEnabled([feeder1Enabled, feeder2Enabled]))
-        let scoop = row.find(".cat-feeder-scoops input").val()
+        let scoop = row.find(".cat-feeder-scoops select").val()
         let time = row.find(".cat-feeder-time input").val()
 
         let formData = {
@@ -108,12 +114,18 @@ function buildRow(feederConfig){
 }
 
 function tempDisableChanges(){
-    $("#manual-feed-april").attr("disabled", true)
-    $("#manual-feed-mia").attr("disabled", true)
-    window.setTimeout(() => {
+    // grab ref
+    let april_buttons = $(".manual-april-buttons button")
+    let mia_buttons = $(".manual-mia-buttons button")
 
-        $("#manual-feed-april").attr("disabled", false)
-        $("#manual-feed-mia").attr("disabled", false)
+    // disable
+    april_buttons.attr("disabled", true)
+    mia_buttons.attr("disabled", true)
+
+    // enable after 5 second timeout
+    window.setTimeout(() => {
+        april_buttons.attr("disabled", false)
+        mia_buttons.attr("disabled", false)
     }, 5000)
 }
 
@@ -127,8 +139,16 @@ window.onload = () => {
         }
     })
 
-    $("#manual-feed-april").click(() => {$.get(URL_Feeder, {"feeder": 0}); tempDisableChanges()})
-    $("#manual-feed-mia").click(() => {$.get(URL_Feeder, {"feeder": 1}); tempDisableChanges()})
+    $(".manual-april-buttons button").on("click", (e) => {
+        let numScoops = $(e.currentTarget).text()
+        $.get(URL_Feeder, {"feeder": 0, "scoop": numScoops});
+        tempDisableChanges();
+    })
+    $(".manual-mia-buttons button").on("click", (e) => {
+        let numScoops = $(e.currentTarget).text()
+        $.get(URL_Feeder, {"feeder": 1, "scoop": numScoops});
+        tempDisableChanges()
+    })
 }
 fetch(URL_Status).then(r => r.text()).then(t => {
     document.getElementById('status').innerHTML = t;
