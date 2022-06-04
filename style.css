@@ -23,3 +23,12 @@
     padding-left: 30px!important;
     padding-right: 30px!important;
 }
+
+.wide-mode {
+    padding-top: 10em;
+    width: 100% !important;
+}
+
+.wide-mode button {
+    width: 10em
+}
