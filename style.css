@@ -29,6 +29,12 @@
     width: 100% !important;
 }
 
+.wide-mode .cat-name {
+    font-size: 5em!important;
+}
+
 .wide-mode button {
-    width: 10em
+    width: 1.5em;
+    /* height: 10em; */
+    font-size: 10rem!important;
 }
